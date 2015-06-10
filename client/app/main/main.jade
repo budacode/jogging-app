@@ -1,0 +1,109 @@
+div(ng-include='"components/navbar/navbar.html"')
+
+header#banner.hero-unit
+  .container(ng-show='!isLoggedIn()')
+    h1 Welcome to Joggin' Master™!
+    br
+    br
+    p.lead Start jogging today!
+  .container(ng-show='isLoggedIn()')
+    h1 The ultimate jogging list
+
+.container(ng-show='isLoggedIn()')
+  .row.padded
+    .col-lg-2
+      h2 Date Filter
+  .row.padded
+    .col-lg-2
+      .form-group
+        label(for='dateFromInput') From
+        input.form-control(type='date', ng-model='dateFrom', name='dateFromInput', id='dateFromInput')
+    .col-lg-2
+      .form-group
+        label(for='dateToInput') To
+        input.form-control(type='date', ng-model='dateTo', name='dateToInput', id='dateToInput')
+  hr
+  .row.padded
+    .col-lg-2
+      strong Date
+    .col-lg-2
+      strong Distance
+    .col-lg-2
+      strong Duration
+    .col-lg-2
+      strong Avg. Speed
+    .col-lg-2
+      strong Edit
+    .col-lg-2
+      strong Delete
+  .row.padded(ng-repeat='(key, timeRecord) in timeRecords | dateRange:dateFrom:dateTo')
+    div(ng-if='!timeRecord.edit')
+      .col-lg-2 {{ timeRecord.date | date }}
+      .col-lg-2 {{ timeRecord.distance }} km
+      .col-lg-2 {{ timeRecord.duration }} minutes
+      .col-lg-2 {{ timeRecord.distance / (timeRecord.duration / 60) | number:2 }} km/h
+      .col-lg-2
+        .editIcon.glyphicon.glyphicon-pencil(ng-click='editTimeRecord(timeRecord, key)')
+      .col-lg-2
+        .removeIcon.glyphicon.glyphicon-remove(ng-click='deleteTimeRecord(timeRecord, key)')
+    div(ng-if='timeRecord.edit')
+      form(ng-submit='saveTimeRecord(timeRecord, key)()', name='editTimeForm')
+        .col-lg-2
+          .form-group
+            input.form-control(type='date', ng-model='timeRecord.dateObject', name='dateInput', id='dateInput', ng-required='true')
+        .col-lg-2
+          .form-group
+            input.form-control(type='text', ng-model='timeRecord.distance', name='distanceInput', id='distanceInput', placeholder='(in km)', ng-pattern='/^[0-9]*$/', ng-required='true')
+        .col-lg-2
+          .form-group
+            input.form-control(type='text', ng-model='timeRecord.duration', name='durationInput', id='durationInput', placeholder='(in minutes)', ng-pattern='/^[0-9]*$/', ng-required='true')
+        .col-lg-2 {{ timeRecord.distance / (timeRecord.duration / 60) | number:2 }} km/h
+        .col-lg-2
+          a(ng-click='saveTimeRecord(timeRecord, key)', href='#', ng-show='!editTimeForm.$invalid') save
+          span.alert.alert-danger(ng-show='editTimeForm.$invalid') Invalid input
+          |  /&nbsp;
+          a(ng-click='cancelEditTimeRecord(timeRecord, key)', href='#') cancel
+        .col-lg-2
+          .removeIcon.glyphicon.glyphicon-remove(ng-click='deleteTimeRecord(timeRecord, key)')
+  hr
+  form(ng-submit='addTimeRecord()', name='addTimeForm')
+    .row.padded
+      .col-lg-2
+        .form-group
+          input.form-control(type='date', ng-model='newTimeRecord.date', name='dateInput', id='dateInput')
+      .col-lg-2
+        .form-group
+          input.form-control(type='text', ng-model='newTimeRecord.distance', name='distanceInput', id='distanceInput', placeholder='(in km)', ng-pattern='/^[0-9]*$/')
+      .col-lg-2
+        .form-group
+          input.form-control(type='text', ng-model='newTimeRecord.duration', name='durationInput', id='durationInput', placeholder='(in minutes)', ng-pattern='/^[0-9]*$/')
+      .col-lg-2
+        input.btn.btn-success(ng-show='addTimeForm.$valid', type='submit', value='+ Add jogging', id='submitButton')
+        .alert.alert-danger(ng-show='addTimeForm.$invalid') Invalid input
+
+  .row.padded
+    .col-lg-12
+      h1 Weekly reports
+      // avg. speed and distance
+      .row.padded
+        .col-lg-2
+            strong Week
+        .col-lg-2
+            strong Σ Distance
+        .col-lg-2
+            strong Σ Duration
+        .col-lg-2
+            strong Avg. speed
+      //.row
+      //  pre {{ timeReport | json }}
+      .row.padded(ng-repeat='(key, value) in timeReport')
+        .col-lg-2 {{ key }}
+        .col-lg-2 {{ value.distance }}
+        .col-lg-2 {{ value.duration }}
+        .col-lg-2 {{ value.distance / (value.duration / 60) | number:2 }} km/h
+footer.footer
+  .container
+    p
+      | Joggin' Master™
+      = ' | '
+      a(href='https://twitter.com/martzellk') @martzellk
